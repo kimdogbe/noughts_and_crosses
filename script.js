@@ -21,6 +21,12 @@ const gameBoard = function () {
       turnsPlayed++;
       return board;
     }
+
+    return board;
+  }
+
+  const getBoard = function (){
+    return board
   }
 
   const getTurnsPlayed = function () {
@@ -31,23 +37,23 @@ const gameBoard = function () {
     // check rows and columns
     console.log(board)
     for (let i = 0; i < 3; i++) {
-      if (( board[i][0] !==  "" ) && ( board[i][0] === board[i][1] ) && ( board[i][1] === board[i][2] ) ) return true;
-      if (( board[0][i] !==  "" ) && ( board[0][i] === board[1][i] ) && ( board[1][i] === board[2][i] ) ) return true;
+      if (( board[i][0] !==  "" ) && ( board[i][0] === board[i][1] ) && ( board[i][1] === board[i][2] ) ) return board[i][0];
+      if (( board[0][i] !==  "" ) && ( board[0][i] === board[1][i] ) && ( board[1][i] === board[2][i] ) ) return board[0][i];
     }
     
     // check diagonals
-    if (( board[0][0] !==  "" ) && ( board[0][0] === board[1][1] ) && ( board[1][1] === board[2][2] ) ) return true;
-    if (( board[2][0] !==  "" ) && ( board[2][0] === board[1][1] ) && ( board[1][1] === board[0][2] )) return true;
+    if (( board[0][0] !==  "" ) && ( board[0][0] === board[1][1] ) && ( board[1][1] === board[2][2] ) ) return board[0][0];
+    if (( board[2][0] !==  "" ) && ( board[2][0] === board[1][1] ) && ( board[1][1] === board[0][2] )) return board[2][0];
 
     // check all pieces played
     console.log("Turns played:" + turnsPlayed);
     
-    if (turnsPlayed === 9) return true;
+    if (turnsPlayed === 9) return "tie";
 
-    return false;
+    return "";
   }
 
-  return {addPiece, checkGameOver, getTurnsPlayed}
+  return {addPiece, checkGameOver, getTurnsPlayed, getBoard}
 };
 
 function createPlayer (playerName) {
@@ -77,24 +83,26 @@ function createPlayer (playerName) {
 function createRound(roundNumber, playerOne, playerTwo) {
   console.log(`Round ${roundNumber}: Current Score ${playerOne.name} (${playerOne.getPiece()}) = ${playerOne.getScore()} vs ${playerTwo.name} (${playerTwo.getPiece()}) = ${playerTwo.getScore()} `)
   const number = roundNumber;
-  let currentPlayer = number % 2 ? playerOne : playerTwo;
+  let startingPlayer = this.number % 2 ? playerOne : playerTwo;
+  let currentPlayer = startingPlayer;
+  let winner = "";
 
   const roundBoard = gameBoard();
   let currentBoard = [];
-  
-  while (!roundBoard.checkGameOver()){
-    currentPlayer = currentPlayer.name == playerOne.name ? playerTwo : playerOne;
 
-    let location = prompt(`Select next position ${currentPlayer.name}`);
-
-    currentBoard = roundBoard.addPiece(currentPlayer.getPiece(), location);
+  const piecePlayed = function(location) {
+    currentBoard = this.roundBoard.addPiece(currentPlayer.getPiece(), location);
     console.log(`${currentBoard[0]} \n ${currentBoard[1]} \n ${currentBoard[2]}`);
-  }
-  
-  let winner = currentPlayer;
-  winner.addPoint();
 
-  return {number, winner, roundBoard}
+    if (this.roundBoard.checkGameOver()) {
+      this.winner = this.roundBoard.checkGameOver();
+      if (this.winner != "tie") currentPlayer.addPoint();
+      console.log("Round winner: " + this.winner);
+    }
+    currentPlayer = currentPlayer.name == playerOne.name ? playerTwo : playerOne;
+  };
+
+  return {number, winner, roundBoard, piecePlayed}
 }
 
 function playerSetup () {
@@ -134,18 +142,55 @@ function gameWinner (playerOne, playerTwo) {
   }
 }
 
-
 function createNewGame () {
-  let roundNumber = 1;
+  let roundNumber = 0;
+  let numberOfRounds = 3;
   const {playerOne, playerTwo} = playerSetup();
+  let rounds = [];
 
-  while (roundNumber <= 3){
-    createRound(roundNumber, playerOne, playerTwo);
-    roundNumber++;
+  for (let i = 1; i <= numberOfRounds; i++){
+    rounds.push(createRound(i, playerOne, playerTwo));
   }
-  
-  const winner = gameWinner(playerOne, playerTwo);
-  console.log("Winner is " + winner);
 
-  return {playerOne, playerTwo, roundNumber, winner};
+  let currentRound = rounds[roundNumber];
+
+  addEventListener("click", (event) => {
+    if (event.target.id.startsWith("box")){
+      let boxedPressed = Number(event.target.id.split("-")[1]);
+      currentRound.piecePlayed(boxedPressed);
+      updateBoard(currentRound.roundBoard.getBoard());
+
+      if (currentRound.winner !== ""){
+        if (roundNumber + 1 === numberOfRounds) {
+          const winner = gameWinner(playerOne, playerTwo);
+          console.log("Winner is " + winner);
+        }
+        else {
+          roundNumber++;
+          currentRound = rounds[roundNumber];
+          console.log(`Round ${roundNumber} done! Next round = ${currentRound.number}`)
+          console.log(`Current Score ${playerOne.name}: ${playerOne.getScore()} vs ${playerTwo.name}: ${playerTwo.getScore()} `)
+        }
+      }
+
+    }
+  });
+
+  return {playerOne, playerTwo, roundNumber, currentRound};
+}
+
+addEventListener('click', (event) => {
+  if (event.target.id == "newGame"){
+    createNewGame();
+  }
+})
+
+function updateBoard(currentBoard) {
+  currentBoard = currentBoard.flat();
+
+  let htmlBoxes = document.querySelectorAll("#gameboard div");
+    
+  for (let i = 0; i < currentBoard.length; i++) {
+    htmlBoxes[i].innerHTML = currentBoard[i];
+  }
 }
