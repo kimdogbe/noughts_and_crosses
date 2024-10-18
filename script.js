@@ -168,8 +168,9 @@ function createNewGame () {
         else {
           roundNumber++;
           currentRound = rounds[roundNumber];
-          console.log(`Round ${roundNumber} done! Next round = ${currentRound.number}`)
-          console.log(`Current Score ${playerOne.name}: ${playerOne.getScore()} vs ${playerTwo.name}: ${playerTwo.getScore()} `)
+          console.log(`Round ${roundNumber} done! Next round = ${currentRound.number}`);
+          console.log(`Current Score ${playerOne.name}: ${playerOne.getScore()} vs ${playerTwo.name}: ${playerTwo.getScore()} `);
+          updateScoreboard(playerOne, playerTwo);
         }
       }
 
@@ -193,4 +194,15 @@ function updateBoard(currentBoard) {
   for (let i = 0; i < currentBoard.length; i++) {
     htmlBoxes[i].innerHTML = currentBoard[i];
   }
+}
+
+function updateScoreboard(playerOne, playerTwo) {
+  let scoreBoard = document.querySelector("#scoreboard");
+
+  let playerOneName = playerOne.name;
+  let playerTwoName = playerTwo.name;
+  let playerOneScore = playerOne.getScore();
+  let playerTwoScore = playerTwo.getScore();
+
+  scoreBoard.innerHTML = `${playerOneName} = ${playerOneScore} vs ${playerTwoName} = ${playerTwoScore}`;
 }
