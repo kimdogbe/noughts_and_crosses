@@ -117,21 +117,12 @@ function createRound(roundNumber, playerOne, playerTwo) {
   return {roundBoard, piecePlayed, getCurrentPlayer, getWinner, getRoundNumber}
 }
 
-function playerSetup () {
-  const playerOneName = prompt("Ready Player one? What is your name");
-  const playerTwoName = prompt("Ready Player two? What is your name");
+function playerSetup (playerOneName, playerTwoName) {
+  let playerOne = playerOneName.trim() ? createPlayer(playerOneName) : createPlayer("P1");
+  let playerTwo = playerTwoName.trim() ? createPlayer(playerTwoName) : createPlayer("P2");
 
-  let playerOne = createPlayer(playerOneName);
-  let playerTwo = createPlayer(playerTwoName);
-
-  console.log(`Next up! ${playerOne.name} vs ${playerTwo.name}`);
-  
-  const playerOnePiece = prompt(`${playerOne.name}! Select your piece ->`);
-  let playerTwoPiece = prompt(`${playerTwo.name}! Select your piece ->`);
-  
-  while (playerOnePiece == playerTwoPiece) {
-    playerTwoPiece = prompt(`Sorry ${playerTwo.name} that piece has already been selected. Please select another`);
-  }
+  const playerOnePiece = "X";
+  const playerTwoPiece = "O";
 
   playerOne.setPiece(playerOnePiece);
   playerTwo.setPiece(playerTwoPiece);
@@ -156,10 +147,10 @@ function gameWinner (playerOne, playerTwo) {
   }
 }
 
-function createNewGame () {
+function createNewGame (playerOneName, playerTwoName) {
   let roundNumber = 0;
   let numberOfRounds = 3;
-  const {playerOne, playerTwo} = playerSetup();
+  const {playerOne, playerTwo} = playerSetup(playerOneName, playerTwoName);
   let rounds = [];
 
   for (let i = 1; i <= numberOfRounds; i++){
@@ -180,13 +171,13 @@ function createNewGame () {
         if (roundNumber + 1 === numberOfRounds) {
           const winner = gameWinner(playerOne, playerTwo);
           roundNumber ++;
+          updateScoreboard(playerOne, playerTwo, roundNumber);
           updateInstructions("Champion is " + winner);
         }
         else {
           roundNumber++;
           currentRound = rounds[roundNumber];
-          console.log(`Round ${roundNumber} done! Next round = ${currentRound.getRoundNumber()}`);
-          console.log(`Current Score ${playerOne.name}: ${playerOne.getScore()} vs ${playerTwo.name}: ${playerTwo.getScore()} `);
+          updateInstructions(`Round ${roundNumber} done! Next round = ${currentRound.getRoundNumber()}`);
           updateScoreboard(playerOne, playerTwo, roundNumber+1);
         }
       }
@@ -197,11 +188,24 @@ function createNewGame () {
   return {playerOne, playerTwo, roundNumber, currentRound};
 }
 
+const dialogElement = document.querySelector("dialog");
+const playerOneInput = document.querySelector("#player-one");
+const playerTwoInput = document.querySelector("#player-two");
+
 addEventListener('click', (event) => {
-  if (event.target.id == "newGame"){
-    createNewGame();
+  
+  if (event.target.id == "new-game"){
+    dialogElement.showModal();
   }
-})
+  else if (event.target.id == "close"){
+    event.preventDefault()
+    dialogElement.close();
+  }
+  else if (event.target.id == "start-game"){
+    createNewGame(playerOneInput.value, playerTwoInput.value);
+    dialogElement.close();
+  }
+});
 
 function updateBoard(currentBoard) {
   currentBoard = currentBoard.flat();

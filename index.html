@@ -11,27 +11,40 @@
   <div id="container">
     <div id="heading">
       <h1>Noughts & Crosses</h1>
-      <button id="newGame">New Game</button>
+      <button id="new-game">New Game</button>
     </div>
     <div id="scoreboard">
       <h2>Round 1</h2>
       <div>Player 1 vs Player 2</div>
     </div>
     <div id="gameboard">
-      <div id="box-0">X</div>
-      <div id="box-1">O</div>
-      <div id="box-2">X</div>
-      <div id="box-3">X</div>
-      <div id="box-4">O</div>
-      <div id="box-5">X</div>
-      <div id="box-6">X</div>
-      <div id="box-7">X</div>
-      <div id="box-8">X</div>
-
+      <div id="box-0"> </div>
+      <div id="box-1"> </div>
+      <div id="box-2"> </div>
+      <div id="box-3"> </div>
+      <div id="box-4"> </div>
+      <div id="box-5"> </div>
+      <div id="box-6"> </div>
+      <div id="box-7"> </div>
+      <div id="box-8"> </div>
     </div>
     <div id="instructions">
       Waiting for game to start...
     </div>
+
+    <dialog>
+      <form action="" method="POST" id="player-form">
+        <label for="player-one">Player1 Name</label>
+        <input type="text" placeholder="Kwame" id="player-one" autofocus required>
+        
+        <label for="player-two">Player2 Name</label>
+        <input type="text" placeholder="Ama" id="player-two" required>
+      </form>
+      <div>
+        <button id="close">Close</button>
+        <button id="start-game">Start Game</button>
+      </div>
+    </dialog>
   </div>
 </body>
 </html>
