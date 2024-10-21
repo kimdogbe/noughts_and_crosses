@@ -24,6 +24,7 @@ body {
   width: 60vw;
   padding: 20px;
   border-radius: 20px;
+  text-align: center;
 }
 
 #heading {
@@ -48,8 +49,6 @@ body {
   background-color: var(--color-brown);
   width: 100%;
   font-size: 5rem;
-  text-justify: center;
-  text-align: center;
 }
 
 button {

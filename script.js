@@ -81,28 +81,40 @@ function createPlayer (playerName) {
 }
 
 function createRound(roundNumber, playerOne, playerTwo) {
-  console.log(`Round ${roundNumber}: Current Score ${playerOne.name} (${playerOne.getPiece()}) = ${playerOne.getScore()} vs ${playerTwo.name} (${playerTwo.getPiece()}) = ${playerTwo.getScore()} `)
   const number = roundNumber;
-  let startingPlayer = this.number % 2 ? playerOne : playerTwo;
+  let startingPlayer = number % 2 ? playerOne : playerTwo;
   let currentPlayer = startingPlayer;
   let winner = "";
+  console.log(`Round ${roundNumber}: Current Score ${playerOne.name} (${playerOne.getPiece()}) = ${playerOne.getScore()} vs ${playerTwo.name} (${playerTwo.getPiece()}) = ${playerTwo.getScore()} Starting: ${startingPlayer.name} `)
 
   const roundBoard = gameBoard();
   let currentBoard = [];
 
-  const piecePlayed = function(location) {
+  const piecePlayed = function (location) {
     currentBoard = this.roundBoard.addPiece(currentPlayer.getPiece(), location);
-    console.log(`${currentBoard[0]} \n ${currentBoard[1]} \n ${currentBoard[2]}`);
-
+    
     if (this.roundBoard.checkGameOver()) {
-      this.winner = this.roundBoard.checkGameOver();
-      if (this.winner != "tie") currentPlayer.addPoint();
-      console.log("Round winner: " + this.winner);
+      winner = this.roundBoard.checkGameOver();
+      if (winner != "tie") currentPlayer.addPoint();
+      console.log("Round winner: " + winner);
     }
+
     currentPlayer = currentPlayer.name == playerOne.name ? playerTwo : playerOne;
   };
 
-  return {number, winner, roundBoard, piecePlayed}
+  const getCurrentPlayer = function () {
+    return currentPlayer;
+  };
+
+  const getWinner = function () {
+    return winner;
+  }
+
+  const getRoundNumber = function () {
+    return number;
+  }
+  
+  return {roundBoard, piecePlayed, getCurrentPlayer, getWinner, getRoundNumber}
 }
 
 function playerSetup () {
@@ -126,6 +138,8 @@ function playerSetup () {
 
   console.log(`In the red corner! ${playerOne.name} fighting with ${playerOne.getPiece()}`);
   console.log(`In the red corner! ${playerTwo.name} fighting with ${playerTwo.getPiece()}`);
+
+  updateScoreboard(playerOne, playerTwo, 1);
 
   return {playerOne, playerTwo}
 }
@@ -153,24 +167,27 @@ function createNewGame () {
   }
 
   let currentRound = rounds[roundNumber];
+  updateInstructions(`${currentRound.getCurrentPlayer().name}'s (${currentRound.getCurrentPlayer().getPiece()}) turn.`);
 
   addEventListener("click", (event) => {
-    if (event.target.id.startsWith("box")){
+    if (event.target.id.startsWith("box") && (roundNumber < numberOfRounds)){
       let boxedPressed = Number(event.target.id.split("-")[1]);
       currentRound.piecePlayed(boxedPressed);
       updateBoard(currentRound.roundBoard.getBoard());
+      updateInstructions(`${currentRound.getCurrentPlayer().name}'s (${currentRound.getCurrentPlayer().getPiece()}) turn.`);
 
-      if (currentRound.winner !== ""){
+      if (currentRound.getWinner() !== ""){
         if (roundNumber + 1 === numberOfRounds) {
           const winner = gameWinner(playerOne, playerTwo);
-          console.log("Winner is " + winner);
+          roundNumber ++;
+          updateInstructions("Champion is " + winner);
         }
         else {
           roundNumber++;
           currentRound = rounds[roundNumber];
-          console.log(`Round ${roundNumber} done! Next round = ${currentRound.number}`);
+          console.log(`Round ${roundNumber} done! Next round = ${currentRound.getRoundNumber()}`);
           console.log(`Current Score ${playerOne.name}: ${playerOne.getScore()} vs ${playerTwo.name}: ${playerTwo.getScore()} `);
-          updateScoreboard(playerOne, playerTwo);
+          updateScoreboard(playerOne, playerTwo, roundNumber+1);
         }
       }
 
@@ -196,8 +213,9 @@ function updateBoard(currentBoard) {
   }
 }
 
-function updateScoreboard(playerOne, playerTwo) {
-  let scoreBoard = document.querySelector("#scoreboard");
+function updateScoreboard(playerOne, playerTwo, roundNumber) {
+  let scoreBoard = document.querySelector("#scoreboard > div");
+  let roundElement = document.querySelector("#scoreboard > h2");
 
   let playerOneName = playerOne.name;
   let playerTwoName = playerTwo.name;
@@ -205,4 +223,11 @@ function updateScoreboard(playerOne, playerTwo) {
   let playerTwoScore = playerTwo.getScore();
 
   scoreBoard.innerHTML = `${playerOneName} = ${playerOneScore} vs ${playerTwoName} = ${playerTwoScore}`;
+  roundElement.innerHTML = `Round ${roundNumber}`;
+}
+
+function updateInstructions(message) {
+  let instructions = document.querySelector("#instructions");
+
+  instructions.innerHTML = message;
 }
